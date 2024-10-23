@@ -1,111 +1,236 @@
-import React, { useState } from "react";
-
-// Define the shape of a dance object
-interface DanceCraze {
-    name: string;
-    link: string;
-}
-
-const App: React.FC = () => {
-    const danceCrazes: DanceCraze[] = [
-        {
-            name: "Ice Cream Yummy",
-            link: "https://www.youtube.com/embed/sxqrLc5S0Ao",
-        },
-        {
-            name: "Maybe This Time",
-            link: "https://www.youtube.com/embed/ZtXlh7LlfoI",
-        },
-        {
-            name: "Rock With You",
-            link: "https://www.youtube.com/embed/dgxHAjNgUeA",
-        },
-    ];
-
-    const [selectedDance, setSelectedDance] = useState<DanceCraze | null>(null);
-    const [isWaiting, setIsWaiting] = useState(false); // State to track waiting
-    const [message, setMessage] = useState<string>(""); // State to track the message
-    const [countdown, setCountdown] = useState<number | null>(null); // Countdown state
-
-    const handleChooseDance = (): void => {
-        setIsWaiting(true); // Set waiting state to true
-        setMessage("Wait lang guyz"); // Initial message
-
-        let elapsed = 0;
-
-        const intervalId = setInterval(() => {
-            elapsed += 1;
-
-            // Change message based on elapsed time
-            if (elapsed <= 4) {
-                setMessage("Wait lang guyz");
-            } else if (elapsed <= 7) {
-                setMessage("Kunting Kembot pa");
-            } else if (elapsed <= 10) {
-                setMessage("Wait eto na talaga");
-            } else if (elapsed > 10 && elapsed <= 15) {
-                setCountdown(15 - elapsed); // Start countdown (5-1)
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Dance Craze App</title>
+        <style>
+            body,
+            #app {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+                background-color: #f7fafc; /* Light gray background */
+                padding: 24px;
+                font-family: Arial, sans-serif;
+                overflow: hidden; /* Prevents scrollbars when confetti is falling */
             }
 
-            // After 15 seconds, reveal the dance and clear the interval
-            if (elapsed === 15) {
-                const randomDance =
-                    danceCrazes[Math.floor(Math.random() * danceCrazes.length)];
-                setSelectedDance(randomDance);
-                setIsWaiting(false);
-                clearInterval(intervalId); // Clear the interval once complete
+            h1,
+            h2 {
+                margin: 16px 0;
+                color: #4a5568; /* Dark gray text */
             }
-        }, 1000); // Run every second (1000ms)
-    };
 
-    return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
-            {isWaiting ? (
-                <div>
-                    {countdown === null ? (
-                        <h1 className="text-4xl font-bold text-gray-800">
-                            {message}
-                        </h1>
-                    ) : (
-                        <h1 className="text-4xl font-bold text-gray-800">
-                            Countdown: {countdown}
-                        </h1>
-                    )}
-                </div>
-            ) : (
-                <>
-                    {selectedDance && (
-                        <div className="mb-8 text-center">
-                            <h2 className="text-2xl font-semibold text-gray-700">
-                                You got: {selectedDance.name}!
-                            </h2>
-                            <div className="mt-6">
-                                <iframe
-                                    width="560"
-                                    height="315"
-                                    src={selectedDance.link}
-                                    title={selectedDance.name}
-                                    className="rounded-lg shadow-md"
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                ></iframe>
-                            </div>
-                        </div>
-                    )}
-                    <h1 className="text-4xl font-bold text-gray-800 mb-8">
-                        Choose Your Dance Craze
-                    </h1>
-                    <button
-                        onClick={handleChooseDance}
-                        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-                    >
-                        Pick a Dance Craze
-                    </button>
-                </>
-            )}
-        </div>
-    );
-};
+            h1 {
+                font-size: 2rem; /* Equivalent to text-4xl */
+                font-weight: bold;
+            }
 
-export default App;
+            h2 {
+                font-size: 1.5rem; /* Equivalent to text-2xl */
+                font-weight: 600; /* Semi-bold */
+            }
+
+            button {
+                background-color: #4299e1; /* Blue color */
+                color: white;
+                font-weight: 600;
+                padding: 12px 32px; /* Equivalent to py-3 px-8 */
+                border: none;
+                border-radius: 8px; /* Rounded corners */
+                cursor: pointer;
+                transition: all 0.3s ease-in-out;
+            }
+
+            button:hover {
+                background-color: #3182ce; /* Darker blue on hover */
+                transform: scale(1.05); /* Scale up on hover */
+            }
+
+            .dance-video {
+                margin-top: 24px;
+                text-align: center;
+            }
+
+            iframe {
+                border-radius: 8px; /* Rounded corners for iframe */
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app"></div>
+
+        <script>
+            const danceCrazes = [
+                {
+                    name: "Ice Cream Yummy",
+                    link: "https://www.youtube.com/embed/sxqrLc5S0Ao",
+                },
+                {
+                    name: "Maybe This Time",
+                    link: "https://www.youtube.com/embed/ZtXlh7LlfoI",
+                },
+                {
+                    name: "Rock With You",
+                    link: "https://www.youtube.com/embed/dgxHAjNgUeA",
+                },
+            ];
+
+            let selectedDance = null;
+            let isWaiting = false;
+            let message = "";
+            let countdown = null;
+
+            const appElement = document.getElementById("app");
+
+            function updateUI() {
+                appElement.innerHTML = "";
+
+                if (isWaiting) {
+                    const messageElement = document.createElement("h1");
+                    messageElement.textContent =
+                        countdown === null
+                            ? message
+                            : `Countdown: ${countdown}`;
+                    appElement.appendChild(messageElement);
+                } else {
+                    if (selectedDance) {
+                        const danceMessage = document.createElement("h2");
+                        danceMessage.textContent = `You got: ${selectedDance.name}!`;
+                        appElement.appendChild(danceMessage);
+
+                        const videoContainer = document.createElement("div");
+                        videoContainer.classList.add("dance-video");
+                        const iframe = document.createElement("iframe");
+                        iframe.width = 560;
+                        iframe.height = 315;
+                        iframe.src = selectedDance.link;
+                        iframe.title = selectedDance.name;
+                        iframe.allow =
+                            "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+                        iframe.allowFullscreen = true;
+
+                        videoContainer.appendChild(iframe);
+                        appElement.appendChild(videoContainer);
+
+                        // Trigger confetti effect
+                        triggerConfetti();
+                    }
+
+                    const chooseMessage = document.createElement("h1");
+                    chooseMessage.textContent = "Choose Your Dance Craze";
+                    appElement.appendChild(chooseMessage);
+
+                    const button = document.createElement("button");
+                    button.textContent = "Pick a Dance Craze";
+                    button.onclick = handleChooseDance;
+                    appElement.appendChild(button);
+                }
+            }
+
+            function handleChooseDance() {
+                isWaiting = true;
+                message = "Wait lang guyz";
+                countdown = null;
+                updateUI();
+
+                let elapsed = 0;
+
+                const intervalId = setInterval(() => {
+                    elapsed += 1;
+
+                    // Change message based on elapsed time
+                    if (elapsed <= 4) {
+                        message = "Wait lang guyz";
+                    } else if (elapsed <= 7) {
+                        message = "Kunting Kembot pa";
+                    } else if (elapsed <= 10) {
+                        message = "Wait eto na talaga";
+                    } else if (elapsed > 10 && elapsed <= 15) {
+                        countdown = 15 - elapsed; // Start countdown (5-1)
+                    }
+
+                    updateUI();
+
+                    // After 15 seconds, reveal the dance and clear the interval
+                    if (elapsed === 15) {
+                        const randomDance =
+                            danceCrazes[
+                                Math.floor(Math.random() * danceCrazes.length)
+                            ];
+                        selectedDance = randomDance;
+                        isWaiting = false;
+                        clearInterval(intervalId); // Clear the interval once complete
+                        updateUI();
+                    }
+                }, 1000); // Run every second (1000ms)
+            }
+
+            function triggerConfetti() {
+                const canvas = document.createElement("canvas");
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                canvas.style.position = "fixed"; // Fixed position to cover the entire viewport
+                canvas.style.top = "0";
+                canvas.style.left = "0";
+                canvas.style.zIndex = "100"; // Set z-index to 100
+                document.body.appendChild(canvas);
+
+                const ctx = canvas.getContext("2d");
+                const particles = [];
+
+                for (let i = 0; i < 100; i++) {
+                    particles.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        r: Math.random() * 5 + 2,
+                        color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                        velocity: {
+                            x: (Math.random() - 0.5) * 5,
+                            y: (Math.random() - 0.5) * 5,
+                        },
+                    });
+                }
+
+                function draw() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    particles.forEach((p) => {
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                        ctx.fillStyle = p.color;
+                        ctx.fill();
+                        ctx.closePath();
+                    });
+                }
+
+                function update() {
+                    particles.forEach((p) => {
+                        p.x += p.velocity.x;
+                        p.y += p.velocity.y;
+                        p.velocity.y += 0.1; // Gravity
+                    });
+
+                    draw();
+                }
+
+                function animate() {
+                    update();
+                    requestAnimationFrame(animate);
+                }
+
+                animate();
+
+                setTimeout(() => {
+                    document.body.removeChild(canvas); // Remove canvas after some time
+                }, 3000); // Display confetti for 3 seconds
+            }
+
+            // Initial render
+            updateUI();
+        </script>
+    </body>
+</html>
